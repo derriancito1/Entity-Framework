@@ -1,4 +1,5 @@
 using Entity_Framework;
+using Entity_Framework.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,8 +21,20 @@ app.MapGet("/dbconexion", async([FromServices] TareasContext dbContext) =>
 
 app.MapGet("/api/tareas", async([FromServices] TareasContext dbContext)=>
 {
-    return Results.Ok(dbContext.Tareas.Include(p=> p.Categoria).Where(p=> p.PrioridadTarea == Entity_Framework.Models.Prioridad.Baja));
+    return Results.Ok(dbContext.Tareas.Include(p=> p.Categoria));
 });
 
+
+app.MapPost("/api/tareas", async([FromServices] TareasContext dbContext, [FromBody] Tarea tarea)=>
+{
+    tarea.TareaId = Guid.NewGuid();
+    tarea.FechaCreacion = DateTime.Now;
+    await dbContext.AddAsync(tarea);
+    //await dbContext.Tareas.AddAsync(tarea); agregar registro segundo metodo
+
+    await dbContext.SaveChangesAsync();
+
+    return Results.Ok();
+});
 
 app.Run();
